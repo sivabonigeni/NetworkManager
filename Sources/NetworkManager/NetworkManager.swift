@@ -5,7 +5,7 @@ import Foundation
 import Combine
 
 public class NetworkManager {
-    nonisolated(unsafe) static let shared = NetworkManager()
+    public nonisolated(unsafe) static let shared = NetworkManager()
     let environment: Environment = .development
 
     private init() {}

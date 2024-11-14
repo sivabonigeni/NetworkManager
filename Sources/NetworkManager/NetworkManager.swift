@@ -10,7 +10,7 @@ public class NetworkManager {
 
     private init() {}
 
-    func request<T: Decodable>(endPoint: EndPoint) -> AnyPublisher<T, Error> {
+    public func request<T: Decodable>(endPoint: EndPoint) -> AnyPublisher<T, Error> {
         let url = buildURL(for: endPoint)
         var request = URLRequest(url: url)
         request.httpMethod = endPoint.method.rawValue

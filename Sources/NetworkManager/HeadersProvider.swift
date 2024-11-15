@@ -7,8 +7,3 @@
 
 import Foundation
 
-public protocol HeadersProvider {
-    var defaultHeaders: [String: String] { get }
-    func updateHeader(key: String, value: String)
-    func removeHeader(key: String)
-}

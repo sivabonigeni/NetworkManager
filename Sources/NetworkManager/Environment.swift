@@ -7,6 +7,3 @@
 
 import Foundation
 
-public protocol EnvironmentProvider {
-    var baseURL: String { get }
-}

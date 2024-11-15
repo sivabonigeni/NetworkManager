@@ -5,24 +5,22 @@ import Foundation
 import Combine
 
 public protocol NetworkService {
-    func setEnvironment(_ environment: EnvironmentProvider)
+    func setEnvironment(_ environment: NetworkEnvironmentProvider)
     func request<T: Decodable>(endPoint: EndPoint) -> AnyPublisher<T, Error>
 }
 
 public class NetworkManager: NetworkService {
     // public nonisolated(unsafe) static let shared = NetworkManager()
-    private var headersProvider: HeadersProvider
-    private var environmentProvider: EnvironmentProvider
+    private var networkConfiguration: NetworkConfiguration
 
     // private init() {}
 
-    public init(headersProvider: HeadersProvider, environmentProvider: EnvironmentProvider) {
-        self.headersProvider = headersProvider
-        self.environmentProvider = environmentProvider
+    public init(networkConfiguration: NetworkConfiguration) {
+        self.networkConfiguration = networkConfiguration
     }
 
-    public func setEnvironment(_ environment: EnvironmentProvider) {
-        self.environmentProvider = environment
+    public func setEnvironment(_ environment: NetworkEnvironmentProvider) {
+        networkConfiguration.setEnvironment(environment)
     }
 
     public func request<T: Decodable>(endPoint: EndPoint) -> AnyPublisher<T, Error> {
@@ -40,14 +38,14 @@ public class NetworkManager: NetworkService {
     }
 
     private func buildURL<T: EndPoint>(for endPoint: T) -> URL? {
-        let urlString = environmentProvider.baseURL + endPoint.path
+        let urlString = networkConfiguration.environment.baseURL + endPoint.path
         return URL(string: urlString)
     }
 
     private func buildRequest<T: EndPoint>(for endPoint: T, url: URL) -> URLRequest {
         var request = URLRequest(url: url)
         request.httpMethod = endPoint.method.rawValue
-        var allHeaders = headersProvider.defaultHeaders
+        var allHeaders = networkConfiguration.headers.defaultHeaders
         if let endPointHeaders = endPoint.headers {
             allHeaders.merge(endPointHeaders) { (_, new) in new }
         }

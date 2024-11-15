@@ -108,3 +108,54 @@ struct Profile: Decodable {
     let name: String
 }
 ```
+
+In this example, we define a ProfileWorker class that makes a request to retrieve the profile data for a given ID using the NetworkManager.
+
+# Customizing Network Configuration
+
+You can customize the network configuration by implementing your own NetworkEnvironmentProvider, NetworkHeadersProvider, NetworkTimeoutProvider, and NetworkRetryProvider.
+
+NetworkEnvironmentProvider: Defines the base URL for the environment (e.g., development, staging, production).
+NetworkHeadersProvider: Defines default headers and provides methods for updating or removing headers.
+NetworkTimeoutProvider: Specifies the timeout duration for network requests.
+NetworkRetryProvider: Defines the retry policy for failed requests, including retry count and delay between retries.
+# Example Custom Providers
+
+```swift
+struct CustomTimeoutProvider: NetworkTimeoutProvider {
+    var timeout: TimeInterval = 20.0 // Custom timeout
+}
+
+struct CustomRetryProvider: NetworkRetryProvider {
+    var retryCount: Int = 5
+    var retryDelay: TimeInterval = 1.0
+
+    func shouldRetry(after attempt: Int) -> Bool {
+        return attempt < retryCount
+    }
+}
+```
+# Error Handling
+This package provides basic error handling using the NetworkError enum. Common errors include:
+
+decodingError: Failed to decode the response.
+invalidURL: The generated URL is invalid.
+serverError: The server returned an error with a status code.
+custom: A custom error message.
+You can handle errors within the .sink completion block:
+
+```swift
+networkManager.request(endPoint: endPoint)
+    .sink { completion in
+        switch completion {
+        case .finished:
+            print("Request finished successfully.")
+        case .failure(let error):
+            print("Request failed with error: \(error)")
+        }
+    } receiveValue: { (response: MyResponseType) in
+        print("Received response: \(response)")
+    }
+```
+# License
+This project is licensed under the MIT License - see the LICENSE file for details.

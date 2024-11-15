@@ -23,6 +23,10 @@ public class NetworkManager: NetworkService {
         networkConfiguration.setEnvironment(environment)
     }
 
+    public func setHeaders(_ headers: NetworkHeadersProvider) {
+        networkConfiguration.setHeaders(headers)
+    }
+
     public func request<T: Decodable>(endPoint: EndPoint) -> AnyPublisher<T, Error> {
         guard let url = buildURL(for: endPoint) else { return Fail(error: NetworkError.invalidURL).eraseToAnyPublisher() }
         let request = buildRequest(for: endPoint, url: url)

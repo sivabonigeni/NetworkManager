@@ -30,7 +30,7 @@ public protocol NetworkRetryProvider {
 
 public struct NetworkConfiguration {
     public var environment: NetworkEnvironmentProvider
-    public let headers: NetworkHeadersProvider
+    public var headers: NetworkHeadersProvider
     public let timeout: NetworkTimeoutProvider
     public let retry: NetworkRetryProvider
 
@@ -48,6 +48,10 @@ public struct NetworkConfiguration {
 
     public mutating func setEnvironment(_ environment: NetworkEnvironmentProvider) {
         self.environment = environment
+    }
+
+    public mutating func setHeaders(_ headers: NetworkHeadersProvider) {
+        self.headers = headers
     }
 }
 

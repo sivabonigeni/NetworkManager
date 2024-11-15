@@ -32,9 +32,10 @@ dependencies: [
 # Usage
 
 Initialize the NetworkManager
+
 First, create a NetworkManager instance by providing a NetworkConfiguration with a specific environment and headers.
 
-import NetworkManager
+```import NetworkManager
 
 // Define your environment provider
 struct MyEnvironment: NetworkEnvironmentProvider {
@@ -68,4 +69,5 @@ let networkConfiguration = NetworkConfiguration(
 
 // Initialize the NetworkManager with configuration
 let networkManager = NetworkManager(networkConfiguration: networkConfiguration)
+```
 

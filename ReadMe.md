@@ -71,3 +71,40 @@ let networkConfiguration = NetworkConfiguration(
 let networkManager = NetworkManager(networkConfiguration: networkConfiguration)
 ```
 
+# Make a Request
+
+You can now use the NetworkManager to make requests. Here's an example of how to make a GET request to fetch a profile:
+
+```swift
+import NetworkManager
+import Combine
+
+class ProfileWorker {
+    let networkManager: NetworkManager
+    private var cancellables = Set<AnyCancellable>()
+
+    init(networkManager: NetworkManager) {
+        self.networkManager = networkManager
+    }
+
+    func getProfile(id: String) {
+        let endPoint = ProfileEndPoint.getProfile(id: id)
+
+        networkManager.request(endPoint: endPoint)
+            .sink { completion in
+                switch completion {
+                case .finished:
+                    print("Finished")
+                case .failure(let error):
+                    print("Error: \(error)")
+                }
+            } receiveValue: { (profile: Profile) in
+                print("Received profile: \(profile.name)")
+            }.store(in: &cancellables)
+    }
+}
+
+struct Profile: Decodable {
+    let name: String
+}
+```

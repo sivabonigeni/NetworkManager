@@ -27,3 +27,44 @@ Alternatively, if you are manually using Swift Package Manager, add the followin
 dependencies: [
     .package(url: "https://github.com/yourusername/NetworkManager.git", from: "1.0.0")
 ]
+
+# Usage
+
+Initialize the NetworkManager
+First, create a NetworkManager instance by providing a NetworkConfiguration with a specific environment and headers.
+
+import NetworkManager
+
+// Define your environment provider
+struct MyEnvironment: NetworkEnvironmentProvider {
+    var baseURL: String {
+        return "https://api.example.com"
+    }
+}
+
+// Define your headers provider
+class MyHeaders: NetworkHeadersProvider {
+    var defaultHeaders: [String: String] {
+        return ["Content-Type": "application/json"]
+    }
+
+    func updateHeader(key: String, value: String) {
+        defaultHeaders[key] = value
+    }
+
+    func removeHeader(key: String) {
+        defaultHeaders.removeValue(forKey: key)
+    }
+}
+
+// Create network configuration
+let environment = MyEnvironment()
+let headers = MyHeaders()
+let networkConfiguration = NetworkConfiguration(
+    environment: environment,
+    headers: headers
+)
+
+// Initialize the NetworkManager with configuration
+let networkManager = NetworkManager(networkConfiguration: networkConfiguration)
+

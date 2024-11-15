@@ -26,7 +26,7 @@ public class NetworkManager: NetworkService {
     }
 
     public func request<T: Decodable>(endPoint: EndPoint) -> AnyPublisher<T, Error> {
-        let url = buildURL(for: endPoint)
+        guard let url = buildURL(for: endPoint) else { return Fail(error: NetworkError.invalidURL).eraseToAnyPublisher() }
         let request = buildRequest(for: endPoint, url: url)
 
         return URLSession.shared.dataTaskPublisher(for: request)
@@ -39,9 +39,12 @@ public class NetworkManager: NetworkService {
             .eraseToAnyPublisher()
     }
 
-    private func buildURL<T: EndPoint>(for endPoint: T) -> URL {
-        let baseURL = URL(string: environmentProvider.baseURL)!
-        return baseURL.appendingPathComponent(endPoint.path)
+    private func buildURL<T: EndPoint>(for endPoint: T) -> URL? {
+        guard var components = URLComponents(string: environmentProvider.baseURL) else {
+            return nil
+        }
+        components.path.append(endPoint.path)
+        return components.url
     }
 
     private func buildRequest<T: EndPoint>(for endPoint: T, url: URL) -> URLRequest {

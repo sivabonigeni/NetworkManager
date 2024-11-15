@@ -21,7 +21,7 @@ public class NetworkManager: NetworkService {
         self.environmentProvider = environmentProvider
     }
 
-    func setEnvironment(_ environment: EnvironmentProvider) {
+    public func setEnvironment(_ environment: EnvironmentProvider) {
         self.environmentProvider = environment
     }
 

@@ -35,7 +35,7 @@ Initialize the NetworkManager
 
 First, create a NetworkManager instance by providing a NetworkConfiguration with a specific environment and headers.
 
-```import NetworkManager
+```swift import NetworkManager
 
 // Define your environment provider
 struct MyEnvironment: NetworkEnvironmentProvider {

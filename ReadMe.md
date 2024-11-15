@@ -26,7 +26,7 @@ Alternatively, if you are manually using Swift Package Manager, add the followin
 ```swift
 dependencies: [
     .package(url: "https://github.com/yourusername/NetworkManager.git", from: "1.0.0")
-]
+]```
 
 # Usage
 

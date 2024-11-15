@@ -5,6 +5,7 @@ import Foundation
 import Combine
 
 public protocol NetworkService {
+    func setEnvironment(_ environment: EnvironmentProvider)
     func request<T: Decodable>(endPoint: EndPoint) -> AnyPublisher<T, Error>
 }
 
@@ -18,6 +19,10 @@ public class NetworkManager: NetworkService {
     public init(headersProvider: HeadersProvider, environmentProvider: EnvironmentProvider) {
         self.headersProvider = headersProvider
         self.environmentProvider = environmentProvider
+    }
+
+    func setEnvironment(_ environment: EnvironmentProvider) {
+        self.environmentProvider = environment
     }
 
     public func request<T: Decodable>(endPoint: EndPoint) -> AnyPublisher<T, Error> {

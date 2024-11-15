@@ -29,6 +29,10 @@ public class NetworkManager {
         }
 
         return URLSession.shared.dataTaskPublisher(for: request)
+            .handleEvents(receiveSubscription: { _ in print("Request started") },
+                              receiveOutput: { _ in print("Response received") },
+                              receiveCompletion: { completion in print("Completion: \(completion)") },
+                              receiveCancel: { print("Request canceled") })
             .map(\.data)
             .decode(type: T.self, decoder: JSONDecoder())
             .eraseToAnyPublisher()

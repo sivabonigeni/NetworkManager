@@ -4,29 +4,25 @@
 import Foundation
 import Combine
 
-public class NetworkManager {
-    public nonisolated(unsafe) static let shared = NetworkManager()
-    let environment: Environment = .development
+public protocol NetworkService {
+    func request<T: Decodable>(endPoint: EndPoint) -> AnyPublisher<T, Error>
+}
 
-    private init() {}
+public class NetworkManager: NetworkService {
+    // public nonisolated(unsafe) static let shared = NetworkManager()
+    private var headersProvider: HeadersProvider
+    private var environmentProvider: EnvironmentProvider
+
+    // private init() {}
+
+    public init(headersProvider: HeadersProvider, environmentProvider: EnvironmentProvider) {
+        self.headersProvider = headersProvider
+        self.environmentProvider = environmentProvider
+    }
 
     public func request<T: Decodable>(endPoint: EndPoint) -> AnyPublisher<T, Error> {
         let url = buildURL(for: endPoint)
-        var request = URLRequest(url: url)
-        request.httpMethod = endPoint.method.rawValue
-        request.allHTTPHeaderFields = endPoint.headers
-
-        if let parameters = endPoint.parameters {
-            if endPoint.method == .get {
-                var urlComponents = URLComponents(url: url, resolvingAgainstBaseURL: false)
-                urlComponents?.queryItems = parameters.map {
-                    URLQueryItem(name: $0.key, value: "\($0.value)")
-                }
-                request.url = urlComponents?.url
-            } else if endPoint.method == .post || endPoint.method == .put {
-                request.httpBody = endPoint.body
-            }
-        }
+        let request = buildRequest(for: endPoint, url: url)
 
         return URLSession.shared.dataTaskPublisher(for: request)
             .handleEvents(receiveSubscription: { _ in print("Request started") },
@@ -39,7 +35,29 @@ public class NetworkManager {
     }
 
     private func buildURL<T: EndPoint>(for endPoint: T) -> URL {
-        let baseURL = URL(string: environment.baseURL)!
+        let baseURL = URL(string: environmentProvider.baseURL)!
         return baseURL.appendingPathComponent(endPoint.path)
+    }
+
+    private func buildRequest<T: EndPoint>(for endPoint: T, url: URL) -> URLRequest {
+        var request = URLRequest(url: url)
+        request.httpMethod = endPoint.method.rawValue
+        var allHeaders = headersProvider.defaultHeaders
+        if let endPointHeaders = endPoint.headers {
+            allHeaders.merge(endPointHeaders) { (_, new) in new }
+        }
+        request.allHTTPHeaderFields = allHeaders
+        if let parameters = endPoint.parameters {
+            if endPoint.method == .get {
+                var urlComponents = URLComponents(url: url, resolvingAgainstBaseURL: false)
+                urlComponents?.queryItems = parameters.map {
+                    URLQueryItem(name: $0.key, value: "\($0.value)")
+                }
+                request.url = urlComponents?.url
+            } else if endPoint.method == .post || endPoint.method == .put {
+                request.httpBody = endPoint.body
+            }
+        }
+        return request
     }
 }

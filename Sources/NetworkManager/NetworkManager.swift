@@ -40,11 +40,8 @@ public class NetworkManager: NetworkService {
     }
 
     private func buildURL<T: EndPoint>(for endPoint: T) -> URL? {
-        guard var components = URLComponents(string: environmentProvider.baseURL) else {
-            return nil
-        }
-        components.path.append(endPoint.path)
-        return components.url
+        let urlString = environmentProvider.baseURL + endPoint.path
+        return URL(string: urlString)
     }
 
     private func buildRequest<T: EndPoint>(for endPoint: T, url: URL) -> URLRequest {

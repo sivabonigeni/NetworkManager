@@ -6,7 +6,13 @@ import Combine
 
 public protocol NetworkService {
     func setEnvironment(_ environment: NetworkEnvironmentProvider)
-    func request<T: Decodable>(endPoint: EndPoint) -> AnyPublisher<T, Error>
+    func request<T: Decodable>(
+        path: String,
+        method: HTTPMethod,
+        parameters: [String: Any]?,
+        headers: [String: String]?,
+        body: Data?
+    ) -> AnyPublisher<T, Error>
 }
 
 public class NetworkManager: NetworkService {
@@ -27,7 +33,7 @@ public class NetworkManager: NetworkService {
         networkConfiguration.setHeaders(headers)
     }
 
-    public func request<T: Decodable>(endPoint: EndPoint) -> AnyPublisher<T, Error> {
+    private func request<T: Decodable>(endPoint: EndPoint) -> AnyPublisher<T, Error> {
         guard let url = buildURL(for: endPoint) else { return Fail(error: NetworkError.invalidURL).eraseToAnyPublisher() }
         let request = buildRequest(for: endPoint, url: url)
 
@@ -39,6 +45,37 @@ public class NetworkManager: NetworkService {
             .map(\.data)
             .decode(type: T.self, decoder: JSONDecoder())
             .eraseToAnyPublisher()
+    }
+
+    public func request<T: Decodable>(
+        path: String,
+        method: HTTPMethod,
+        parameters: [String: Any]? = nil,
+        headers: [String: String]? = nil,
+        body: Data? = nil
+    ) -> AnyPublisher<T, Error> {
+        let endPoint = buildEndPoint(path: path, method: method, parameters: parameters, headers: headers, body: body)
+        guard let url = buildURL(for: endPoint) else { return Fail(error: NetworkError.invalidURL).eraseToAnyPublisher() }
+        let request = buildRequest(for: endPoint, url: url)
+
+        return URLSession.shared.dataTaskPublisher(for: request)
+            .handleEvents(receiveSubscription: { _ in print("Request started") },
+                          receiveOutput: { _ in print("Response received") },
+                          receiveCompletion: { completion in print("Completion: \(completion)") },
+                          receiveCancel: { print("Request canceled") })
+            .map(\.data)
+            .decode(type: T.self, decoder: JSONDecoder())
+            .eraseToAnyPublisher()
+    }
+
+    private func buildEndPoint(
+        path: String,
+        method: HTTPMethod,
+        parameters: [String: Any]? = nil,
+        headers: [String: String]? = nil,
+        body: Data? = nil
+    ) -> DynamicEndPoint {
+        DynamicEndPoint(path: path, method: method, parameters: parameters, headers: headers, body: body)
     }
 
     private func buildURL<T: EndPoint>(for endPoint: T) -> URL? {

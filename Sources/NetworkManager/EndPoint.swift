@@ -7,7 +7,7 @@
 
 import Foundation
 
-public protocol EndPoint {
+protocol EndPoint {
     var path: String { get }
     var method: HTTPMethod { get }
     var parameters: [String: Any]? { get }
@@ -15,3 +15,11 @@ public protocol EndPoint {
     var body: Data? { get }
 }
 
+
+struct DynamicEndPoint: EndPoint {
+    var path: String
+    var method: HTTPMethod
+    var parameters: [String: Any]?
+    var headers: [String: String]?
+    var body: Data?
+}

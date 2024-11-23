@@ -71,8 +71,9 @@ public class NetworkManager: NetworkService {
         return URLSession.shared.dataTaskPublisher(for: request)
             .handleEvents(
                 receiveSubscription: { _ in print("Request started") },
-                receiveOutput: { _, response in
-                    print("Response received: \(response)")
+                receiveOutput: { data, response in
+                    let data = try? JSONSerialization.jsonObject(with: data)
+                    print("Response received: \(data ?? "nil")")
                 },
                 receiveCompletion: { completion in
                     print("Completion: \(completion)")

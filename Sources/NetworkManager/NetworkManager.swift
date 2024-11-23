@@ -58,13 +58,32 @@ public class NetworkManager: NetworkService {
         guard let url = buildURL(for: endPoint) else { return Fail(error: NetworkError.invalidURL).eraseToAnyPublisher() }
         let request = buildRequest(for: endPoint, url: url)
 
-        return URLSession.shared.dataTaskPublisher(for: request)
+        /* return URLSession.shared.dataTaskPublisher(for: request)
             .handleEvents(receiveSubscription: { _ in print("Request started") },
                           receiveOutput: { _ in print("Response received") },
                           receiveCompletion: { completion in print("Completion: \(completion)") },
                           receiveCancel: { print("Request canceled") })
             .map(\.data)
             .decode(type: T.self, decoder: JSONDecoder())
+            .eraseToAnyPublisher() */
+
+
+        return URLSession.shared.dataTaskPublisher(for: request)
+            .handleEvents(
+                receiveSubscription: { _ in print("Request started") },
+                receiveOutput: { _, response in
+                    print("Response received: \(response)")
+                },
+                receiveCompletion: { completion in
+                    print("Completion: \(completion)")
+                },
+                receiveCancel: { print("Request canceled") }
+            )
+            .map(\.data) // Extract data from the tuple (data, response)
+            .decode(type: T.self, decoder: JSONDecoder())
+            .handleEvents(receiveOutput: { decodedData in
+                print("Decoded data: \(decodedData)") // Print decoded data here
+            })
             .eraseToAnyPublisher()
     }
 
